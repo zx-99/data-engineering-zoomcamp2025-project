@@ -1,6 +1,6 @@
-credentials = "/Users/kris/google_credential/ninth-sol-452704-i2-2d8605a6ab55.json"
+credentials = ""
 
-project_id  = "ninth-sol-452704-i2"
+project_id  = ""
 
 region      = "australia-southeast1"
 
