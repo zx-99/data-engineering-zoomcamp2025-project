@@ -1,0 +1,67 @@
+
+version: 2
+
+sources:
+  - name: staging
+    database: "{{ env_var('DBT_DATABASE', 'ninth-sol-452704-i2') }}"
+    schema: "{{ env_var('DBT_SCHEMA', 'song_data') }}"      
+    tables:
+      - name: spotify_top
+
+models:
+    - name: stg_raw_spotify
+      description: "Staging model for raw Spotify data"
+      columns:
+          - name: spotify_id
+            description: "The primary key"
+            tests:
+                # - unique
+                - not_null
+          - name: name
+            description: "The name of the track."
+          - name: artists
+            description: "Artist(s) associated with the track. Raw string, will be split by ', ' in further processing."
+          - name: daily_rank
+            description: "Daily ranking in the Top 50 list."
+          - name: daily_movement
+            description: "Change in rank compared to the previous day."
+          - name: weekly_movement
+            description: "Change in rank compared to the previous week."
+          - name: country
+            description: "ISO country code (if null, represents Global Top 50)."
+          - name: snapshot_date
+            description: "The date when the data was collected."
+          - name: popularity
+            description: "Popularity score on Spotify (0-100)."
+          - name: is_explicit
+            description: "Indicates whether the song contains explicit lyrics."
+          - name: duration_ms
+            description: "Song duration in milliseconds."
+          - name: album_name
+            description: "Album name the song belongs to."
+          - name: album_release_date
+            description: "Album release date as string."
+          - name: danceability
+            description: "How suitable the track is for dancing (0.0-1.0)."
+          - name: energy
+            description: "Intensity and activity level (0.0-1.0)."
+          - name: key
+            description: "Musical key (0=C, 1=C#/Db, …, 11=B)."
+          - name: loudness
+            description: "Average loudness in dB (-60 to 0)."
+          - name: mode
+            description: "Modality (1 = major, 0 = minor)."
+          - name: speechiness
+            description: "Presence of spoken words (0.0-1.0)."
+          - name: acousticness
+            description: "Confidence that the track is acoustic (0.0-1.0)."
+          - name: instrumentalness
+            description: "Predicts if the track contains no vocals (0.0-1.0)."
+          - name: liveness
+            description: "Likelihood that the track was performed live (0.0-1.0)."
+          - name: valence
+            description: "The musical positiveness conveyed (0.0-1.0)."
+          - name: tempo
+            description: "Estimated tempo in BPM."
+          - name: time_signature
+            description: "Estimated time signature (3-7)."

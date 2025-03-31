@@ -1,0 +1,78 @@
+version: 2
+
+models:
+  - name: dim_song
+    description: "Song dimension table with unique songs."
+    columns:
+      - name: spotify_id
+        description: "Unique Spotify ID for the song."
+      - name: name
+        description: "Song name."
+      - name: snapshot_name
+        description: "Album name."
+      - name: snapshot_release_date_ts
+        description: "Album release date converted to TIMESTAMP."
+      - name: duration_ms
+        description: "Duration of the song in milliseconds."
+      - name: is_explicit
+        description: "Indicates if the song contains explicit content."
+  - name: dim_artist
+    description: "Artist dimension table. One record per song per artist."
+    columns:
+      - name: spotify_id
+        description: "Spotify ID linking to the song."
+      - name: artist
+        description: "Individual artist name."
+  - name: dim_country
+    description: "Country dimension table for regional analysis."
+    columns:
+      - name: iso_code
+        description: "ISO country code."
+      - name: country
+        description: "Country."
+      - name: region
+        description: "Region"
+  - name: dim_audio_features
+    description: "Audio features dimension table."
+    columns:
+      - name: spotify_id
+        description: "Spotify ID for the song."
+      - name: danceability
+        description: "How suitable the track is for dancing (0.0-1.0)."
+      - name: energy
+        description: "Intensity and activity level (0.0-1.0)."
+      - name: key
+        description: "Musical key (0=C, ... 11=B)."
+      - name: loudness
+        description: "Average loudness in dB."
+      - name: mode
+        description: "Modality (1 = major, 0 = minor)."
+      - name: speechiness
+        description: "Presence of spoken words (0.0-1.0)."
+      - name: acousticness
+        description: "Confidence that the track is acoustic (0.0-1.0)."
+      - name: instrumentalness
+        description: "Predicts if the track contains no vocals (0.0-1.0)."
+      - name: liveness
+        description: "Likelihood that the track was performed live (0.0-1.0)."
+      - name: valence
+        description: "The musical positiveness conveyed (0.0-1.0)."
+      - name: tempo
+        description: "Estimated tempo in BPM."
+      - name: time_signature
+        description: "Estimated time signature (3-7)."
+  - name: dim_date
+    description: "Date dimension table extracted from snapshot_date."
+    columns:
+      - name: snapshot_date
+        description: "The date value."
+      - name: snapshot_year
+        description: "Year part of the date."
+      - name: snapshot_month
+        description: "Month part of the date."
+      - name: snapshot_day
+        description: "Day part of the date."
+      - name: snapshot_weekday
+        description: "Day of week (1=Sunday, 7=Saturday)."
+      - name: snapshot_is_weekend
+        description: "Indicator if the date is a weekend."

@@ -1,0 +1,56 @@
+version: 2
+
+models:
+  - name: fact_spotify
+    description: "fact table that integrates data with dimension information (song, artist, country, audio features) for downstream visualization and analysis."
+    columns:
+      - name: spotify_id
+        description: "Unique Spotify ID for the track, used to join with dimension tables."
+      - name: artists
+        description: "Concatenated string of artist names involved in the track."
+      - name: song_name
+        description: "The name of the track."
+      - name: album_name
+        description: "The name of the album the track belongs to."
+      - name: album_release_date_ts
+        description: "Album release date converted to TIMESTAMP format."
+      - name: duration_ms
+        description: "Duration of the track in milliseconds."
+      - name: is_explicit
+        description: "Indicates whether the track contains explicit content (true means explicit)."
+      - name: snapshot_date
+        description: "The date on which the data was collected."
+      - name: daily_rank
+        description: "The daily ranking position of the track."
+      - name: daily_movement
+        description: "Change in ranking compared to the previous day."
+      - name: weekly_movement
+        description: "Change in ranking compared to the previous week."
+      - name: popularity
+        description: "Spotify popularity score (0-100)."
+      - name: country
+        description: "Full country name mapped from the ISO code via a seed table."
+      - name: danceability
+        description: "Measure of how suitable the track is for dancing (0.0-1.0)."
+      - name: energy
+        description: "The energy level of the track (0.0-1.0)."
+      - name: key
+        description: "The musical key of the track (0 = C, 1 = C#/Db, …, 11 = B)."
+      - name: loudness
+        description: "Average loudness of the track in dB."
+      - name: mode
+        description: "Indicates the modality (1 for major, 0 for minor)."
+      - name: speechiness
+        description: "Proportion of spoken words in the track (0.0-1.0)."
+      - name: acousticness
+        description: "Confidence that the track is acoustic (0.0-1.0)."
+      - name: instrumentalness
+        description: "Predicts whether the track contains no vocals (0.0-1.0)."
+      - name: liveness
+        description: "Indicator of the likelihood that the track was performed live (0.0-1.0)."
+      - name: valence
+        description: "Measure of the musical positivity conveyed by the track (0.0-1.0)."
+      - name: tempo
+        description: "Tempo of the track in beats per minute (BPM)."
+      - name: time_signature
+        description: "Time signature of the track (typically between 3 and 7)."
