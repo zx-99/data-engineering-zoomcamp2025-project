@@ -96,10 +96,13 @@ curl -X POST http://localhost:8080/api/v1/flows/import -F fileUpload=@flows/03_g
 ![](../asset/01_success.png)
 
    - Run `gcp_setup`
+
 ![](../asset/02_flow.png)
 ![](../asset/02_execute.png)
 ![](../asset/02_success.png)
+
    - Run `gcp_spotify_pipeline`
+
 ![](../asset/03_flow.png)
 ![](../asset/03_execute.png)
 ![](../asset/03_success.png)
@@ -213,6 +216,7 @@ Then, click on **CREATE REPORT** > **ADD TO REPORT**.Rename the report as **Spot
 2. Date range dimension = ```snapshot_date```
 3. Dimension = ```is_explicit```
 4. Metric = CTD ```song_name```
+
 ![](../asset/figure3.png)
 ### Energy vs. Popularity (Australia, Q1 2025)
 1. Create Scatter chart
@@ -221,6 +225,7 @@ Then, click on **CREATE REPORT** > **ADD TO REPORT**.Rename the report as **Spot
 4. Metric X = AVG ```energy```
 5. Metric Y = AVG ```popularity```
 6. Sort = AVG ```energy``` DESCENDING
+
 ![](../asset/figure4.png)
 ### Danceability vs. Popularity (Australia, Q1 2025)
 1. Create Scatter chart
@@ -229,6 +234,7 @@ Then, click on **CREATE REPORT** > **ADD TO REPORT**.Rename the report as **Spot
 4. Metric X = AVG ```danceability```
 5. Metric Y = AVG ```popularity```
 6. Sort = AVG ```danceability``` DESCENDING
+
 ![](../asset/figure5.png)
 
 ## 🧹 Destroy Resources
