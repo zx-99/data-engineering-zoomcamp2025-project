@@ -87,6 +87,7 @@ curl -X POST http://localhost:8080/api/v1/flows/import -F fileUpload=@flows/03_g
 ![](../asset/new_key_value.png)
 ![](../asset/create_creds.png)
 5. Execute Flows:
+
 ![](../asset/flow.png)
 
    - Run `gcp_kv` → input your Project ID and leave others as default → execute
@@ -103,7 +104,7 @@ curl -X POST http://localhost:8080/api/v1/flows/import -F fileUpload=@flows/03_g
 ![](../asset/03_execute.png)
 ![](../asset/03_success.png)
 
-6. Confirm data has been loaded:
+7. Confirm data has been loaded:
 
    - Check GCS bucket
    - Check BigQuery
