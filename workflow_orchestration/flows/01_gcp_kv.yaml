@@ -1,0 +1,48 @@
+id: 01_gcp_kv
+namespace: spotify
+
+inputs:
+  - id: project_id
+    type: STRING
+    displayName: "Your Project ID"
+    defaults: "ninth-sol-452704-i2"
+
+  - id: location
+    type: STRING
+    displayName: "Your Project Location"
+    defaults: "australia-southeast1"
+   
+  - id: bucket_name
+    type: STRING
+    displayName: "Your GCS Bucket Name"
+    defaults: "bucket_song_data"
+
+  - id: dataset_name
+    type: STRING
+    displayName: "Your BigQuery Dataset Name"
+    defaults: "song_data"
+
+tasks:
+  - id: gcp_project_id
+    type: io.kestra.plugin.core.kv.Set
+    key: GCP_PROJECT_ID
+    kvType: STRING
+    value: "{{inputs.project_id}}" # TODO replace with your project id
+
+  - id: gcp_location
+    type: io.kestra.plugin.core.kv.Set
+    key: GCP_LOCATION
+    kvType: STRING
+    value: "{{inputs.location}}"
+
+  - id: gcp_bucket_name
+    type: io.kestra.plugin.core.kv.Set
+    key: GCP_BUCKET_NAME
+    kvType: STRING
+    value:  "{{inputs.bucket_name}}" # TODO make sure it's globally unique!
+
+  - id: gcp_dataset
+    type: io.kestra.plugin.core.kv.Set
+    key: GCP_DATASET
+    kvType: STRING
+    value: "{{inputs.dataset_name}}"

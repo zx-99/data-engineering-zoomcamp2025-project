@@ -1,0 +1,110 @@
+id: 03_gcp_spotify_pipeline
+namespace: spotify
+description: |
+  Download and upload Spotify Top 50 songs in each country from Kaggle to GCS, daily.
+
+variables:
+  file: "universal_top_spotify_songs.csv"
+  zipfile: "top_spotify.zip"
+  renamed_file: "top_spotify_{{ execution.startDate | date('yyyy_MM_dd') }}.csv"
+  gcs_file: "gs://{{ kv('GCP_BUCKET_NAME') }}/{{ vars.renamed_file }}"
+  table: "{{ kv('GCP_DATASET') }}.{{ vars.renamed_file }}"
+  data: "{{ outputs.rename_csv.outputFiles[ 'top_spotify_' ~ (execution.startDate | date('yyyy_MM_dd')) ~'.csv'] }}"
+
+tasks:
+  - id: download_extract
+    type: io.kestra.plugin.scripts.shell.Commands
+    outputFiles:
+      - "*.csv"
+    taskRunner:
+      type: io.kestra.plugin.core.runner.Process
+    commands:
+      - echo "Downloading zip file..."
+      - curl -L -o "{{ vars.zipfile }}" "https://www.kaggle.com/api/v1/datasets/download/asaniczka/top-spotify-songs-in-73-countries-daily-updated"
+      - unzip -o "{{ vars.zipfile }}"
+      - ls -lh
+
+  - id: rename_csv
+    type: io.kestra.plugin.scripts.shell.Commands
+    inputFiles:
+      data.csv: "{{ outputs.download_extract.outputFiles[vars.file] }}"
+    outputFiles:
+      - "{{ render(vars.renamed_file) }}"
+    taskRunner:
+      type: io.kestra.plugin.core.runner.Process
+    commands:
+      - mv "{{ workingDir }}/data.csv" "{{ workingDir }}/{{ render(vars.renamed_file) }}"
+      - echo "Renamed to {{ render(vars.renamed_file) }}"
+      - ls -lh
+  
+  - id: upload_to_gcs
+    type: io.kestra.plugin.gcp.gcs.Upload
+    from: "{{render(vars.data)}}"
+    to: "{{render(vars.gcs_file)}}"
+
+  - id: bq_spotify_ext
+    type: io.kestra.plugin.gcp.bigquery.Query
+    description: "Create external table based the csv file from GCS"
+    sql: |
+      CREATE OR REPLACE EXTERNAL TABLE `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.spotify_top_ext`
+      (
+          spotify_id         STRING OPTIONS(description = "The Spotify ID for the track."),
+          name               STRING OPTIONS(description = "The name of the track."),
+          artists            STRING OPTIONS(description = "The name(s) of the artist(s) associated with the song. Split by ', ' to convert to list."),
+          daily_rank         INT64 OPTIONS(description = "The daily rank of the song in the top 50 list."),
+          daily_movement     INT64 OPTIONS(description = "The change in rankings compared to the previous day."),
+          weekly_movement    INT64 OPTIONS(description = "The change in rankings compared to the previous week."),
+          country            STRING OPTIONS(description = "The ISO code of the country. If Null, it represents 'Global Top 50'."),
+          snapshot_date      STRING OPTIONS(description = "The date on which the data was collected."),
+          popularity         INT64 OPTIONS(description = "A measure of the song's current popularity on Spotify (0-100)."),
+          is_explicit        BOOL OPTIONS(description = "Whether the song contains explicit lyrics."),
+          duration_ms        INT64 OPTIONS(description = "The duration of the song in milliseconds."),
+          album_name         STRING OPTIONS(description = "The album the song belongs to."),
+          album_release_date STRING OPTIONS(description = "The release date of the album."),
+          danceability       FLOAT64 OPTIONS(description = "How suitable a track is for dancing (0.0-1.0)."),
+          energy             FLOAT64 OPTIONS(description = "The intensity and activity level (0.0-1.0)."),
+          key                INT64 OPTIONS(description = "The key the track is in (0=C, 1=C#/Db, ..., 11=B)."),
+          loudness           FLOAT64 OPTIONS(description = "The average loudness of the track in dB (-60 to 0)."),
+          mode               INT64 OPTIONS(description = "The modality (1 = major, 0 = minor)."),
+          speechiness        FLOAT64 OPTIONS(description = "Detects presence of spoken words (0.0-1.0)."),
+          acousticness       FLOAT64 OPTIONS(description = "Confidence that the track is acoustic (0.0-1.0)."),
+          instrumentalness   FLOAT64 OPTIONS(description = "Predicts if a track contains no vocals (0.0-1.0)."),
+          liveness           FLOAT64 OPTIONS(description = "Likelihood that the track was performed live (0.0-1.0)."),
+          valence            FLOAT64 OPTIONS(description = "The musical positiveness conveyed (0.0-1.0)."),
+          tempo              FLOAT64 OPTIONS(description = "Estimated tempo in beats per minute (BPM)."),
+          time_signature     INT64 OPTIONS(description = "Estimated time signature (3-7).")
+      )
+      OPTIONS (
+          format = 'CSV',
+          uris = ['{{ render(vars.gcs_file) }}'],
+          skip_leading_rows = 1,
+          ignore_unknown_values = TRUE
+      );
+
+  - id: bq_spotify
+    type: io.kestra.plugin.gcp.bigquery.Query
+    description: "Create table from external storage and do the partition and cluster"
+    sql: |
+      CREATE OR REPLACE TABLE `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.spotify_top`
+      PARTITION BY DATE(album_release_date_ts)
+      CLUSTER BY country, daily_rank
+      AS
+      SELECT
+      *,
+      TIMESTAMP(PARSE_DATE('%F', snapshot_date)) AS snapshot_date_ts,
+      TIMESTAMP(PARSE_DATE('%F', album_release_date)) AS album_release_date_ts
+      FROM `{{kv('GCP_PROJECT_ID')}}.{{kv('GCP_DATASET')}}.spotify_top_ext`
+      WHERE album_release_date !="";
+
+  - id: purge_files
+    type: io.kestra.plugin.core.storage.PurgeCurrentExecutionFiles
+    description: To avoid cluttering your storage, we will remove the downloaded files
+    disabled: false
+
+pluginDefaults:
+  - type: io.kestra.plugin.gcp
+    values:
+      serviceAccount: "{{kv('GCP_CREDS')}}"
+      projectId: "{{kv('GCP_PROJECT_ID')}}"
+      location: "{{kv('GCP_LOCATION')}}"
+      bucket: "{{kv('GCP_BUCKET_NAME')}}"
